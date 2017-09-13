@@ -8,121 +8,146 @@ main program will display various performance matrices for each process includin
 time, turnaround time, waiting time, response time and their averages for this execution. The
 generated arrival time should be in increasing order.
 */
-#include<stdio.h>
-#include<stdlib.h>
-#include<pthread.h>
 #include<bits/stdc++.h>
+#include<cstdio>
+#include<cstdlib>
+#include<pthread.h>
 using namespace std;
+
+inline void FAST_IO(void){
+	ios_base::sync_with_stdio(false);
+	cin.tie(0);
+};
+const long long int INF=2e18;
+const long MOD=1e9+7;
+
+#define PB push_back
+#define EPS 1e-9
+#define PI 3.1415926535897932384626433832795
+#define MOD 1000000007
+#define read(type) readInt<type>()
+const double pi=acos(-1.0);
+typedef pair<int, int> PII;
+typedef vector<int> VI;
+typedef vector<string> VS;
+typedef vector<PII> VII;
+typedef vector<VI> VVI;
+typedef map<int,int> MPII;
+typedef set<int> SETI;
+typedef multiset<int> MSETI;
+typedef long int int32;
+typedef unsigned long int uint32;
+typedef long long int int64;
+typedef unsigned long long int uint64;
+/*Original program starts*/
+
 int arr[10];
 int bur[10];
-void findwaitingtime(int arr[],int bur[],int n,int quan,int wt[])
+
+void findWaitingTime(int arr[], int n,
+             int bur[], int wt[], int quan)
 {
-	int rem_bt[n];
-	int t;
-	int i=0;
-	for(i=0;i<n;i++)
-	rem_bt[i]=bur[i];
-	while(1){
-		bool done = true;
-		for(i=0;i<n;i++)
-		{
-			if(rem_bt[i]>0)
-			{
-				done=false;
-				if(rem_bt[i]>quan)
-				{
-					t+=quan;
-					rem_bt[i]-=quan;
-				}
-				else
-				{
-					t=t+rem_bt[i];
-					wt[i]=t-bur[i];
-					rem_bt[i]=0;
-				}
-			}
-		}
-		if(done==true) break;
-	}
+    int store_bur[n];
+    for (int i = 0 ; i < n ; i++)
+        store_bur[i] =  bur[i];
+
+    int t = 0;
+    while (true)
+    {
+        bool done = true;
+    for (int i = 0 ; i < n; i++)
+        {if (store_bur[i] > 0)
+            {done = false;
+            if (store_bur[i] > quan)
+                {
+                    t += quan;
+                    store_bur[i] -= quan;
+                }
+            else
+                {
+                    t = t + store_bur[i];
+                    wt[i] = t - bur[i];
+                    store_bur[i] = 0;
+                }
+            }
+        }
+
+
+        if (done == true)
+          break;
+    }
 }
 
-void turnaroundtime(int arr[],int bur[],int  n,int quan,int tat[],int wt[])
+
+void findTurnAroundTime(int arr[], int n,int bur[], int wt[], int tat[])
 {
-	int i=0;
-	for(i=0;i<n;i++)
-		tat[i]=bur[i]+wt[i];
+   for (int i = 0; i < n ; i++)
+        tat[i] = bur[i] + wt[i];
 }
 
-void* findavgtime(void* v)
-{
-	int n=10;
-	int quan=1;
-	int wt[n];
-	int tat[n];
-	float avg_wt;
-	int tot_wt;
-	int tot_tat;
-	float avg_tat;
-	int ct[n];
-	findwaitingtime(arr,bur,n,quan,wt);
-	turnaroundtime(arr,bur,n,quan,tat,wt);
-	int i=0;
-	printf("Arrival-time , Burst-time , waiting time , turn-around-time , Complition-time\n");
-	for(i=0;i<n;i++)
-	{
-		tot_wt+=wt[i];
-		tot_tat+=tat[i];
-		ct[i]=tat[i]+arr[i];
-		printf("%d\t%d\t%d\t%d\t%d\n",arr[i],bur[i],wt[i],tat[i],ct[i]);
-	}
-	avg_wt=(float)tot_wt/(float)n;
-	avg_tat=(float)tot_tat/(float)n;
-	printf("Avarage Waiting time: %f\n",avg_wt);
-	printf("Avarage Turn Around Time: %f\n",avg_tat);
-}
 
+void* execute(void* v)
+{   int n=10;
+    int quan =1;
+    int wt[n], tat[n], total_wt = 0, total_tat = 0;
+    findWaitingTime(arr, n, bur, wt, quan);
+    findTurnAroundTime(arr, n, bur, wt, tat);
+     cout << "arrival time "<< "Burst time "
+         << " Waiting time " << " Turn around time\n";
+
+
+    for (int i=0; i<n; i++)
+    {
+        total_wt = total_wt + wt[i];
+        total_tat = total_tat + tat[i];
+        cout << " " << i+1 << "\t\t" << bur[i] <<"\t "
+             << wt[i] <<"\t\t " << tat[i] <<endl;
+    }
+
+    cout << "Average waiting time = "<< (float)total_wt / (float)n;
+    cout << "\nAverage turn around time = "<< (float)total_tat / (float)n;
+    cout << "\n";
+}
 void swap(int *a,int* b)
 {
 	int temp=*a;
 	*a=*b;
 	*b=temp;
 }
-
-void *generate(void* arri)
+void *create(void* arri)
 {
-	int i;
+	int i,temp1,temp2;
 	for(i=0;i<10;i++)
 	{
-		arr[i] = rand()%10;
-		bur[i] = rand()%30;
-		printf("arr[%d]: %d and brst[%d]: %d\n",i,arr[i],i,bur[i]);
+		arr[i] = rand()%10+1;
+		bur[i] = rand()%10+1;
+
 	}
-	int j=0;
-	for(i=0;i<9;i++)
+	int j ;
+	for(i=0;i<10;i++)
 	{
-		for(j=0;j<10;j++)
+		for(j=0;j<9;j++)
 		{
 			if(arr[j] > arr[j+1])
-			{
-				swap(arr[j],arr[j+1]);
-				swap(bur[j],bur[j+1]);
+			{   temp1 = arr[j];
+                arr[j] = arr[j+1];
+                arr[j+1] = temp1;
+                temp2 = bur[j];
+                bur[j] = bur[j+1];
+                bur[j+1] = temp2;
 			}
 		}
 	}
-	printf("\n\n");
-	for(i=0;i<10;i++)
-	{
-		
-		printf("arr[%d]: %d and brst[%d]: %d\n",i,arr[i],i,bur[i]);
-	}
+
+
 }
 int main()
 {
 	int i=1;
-	pthread_t p1;
-	pthread_create(&p1,NULL,generate,&i);
-	pthread_t p2;
-	pthread_create(&p2,NULL,findavgtime,&i);
-	pthread_join(p1,NULL);
-	pthread_join(p2,NULL);
+	pthread_t t1;
+	pthread_create(&t1,NULL,create,&i);
+	pthread_t t2;
+	pthread_create(&t2,NULL,execute,&i);
+	pthread_join(t1,NULL);
+	pthread_join(t2,NULL);
 }
